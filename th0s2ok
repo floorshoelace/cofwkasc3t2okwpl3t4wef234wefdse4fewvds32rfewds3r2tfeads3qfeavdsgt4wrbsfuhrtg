@@ -1,0 +1,74 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/floorshoelace/cofwkasc3t2okwpl3t4wef234wefdse4fewvds32rfewds3r2tfeads3qfeavdsgt4wrbsfuhrtg/da906135f5e09339b7211af764fef644cd4e297e/awwwk", true))() -- awk to base
+loadstring(game:HttpGet("https://raw.githubusercontent.com/floorshoelace/cofwkasc3t2okwpl3t4wef234wefdse4fewvds32rfewds3r2tfeads3qfeavdsgt4wrbsfuhrtg/refs/heads/main/bawaseeeee", true))() -- base to awk
+loadstring(game:HttpGet("https://raw.githubusercontent.com/floorshoelace/cofwkasc3t2okwpl3t4wef234wefdse4fewvds32rfewds3r2tfeads3qfeavdsgt4wrbsfuhrtg/refs/heads/main/telepasdpw", true))() -- tp behind
+loadstring(game:HttpGet("https://raw.githubusercontent.com/travislmao/pub-scripts/main/abagui", true))() -- no stun
+loadstring(game:HttpGet("https://raw.githubusercontent.com/floorshoelace/cofwkasc3t2okwpl3t4wef234wefdse4fewvds32rfewds3r2tfeads3qfeavdsgt4wrbsfuhrtg/refs/heads/main/Dodgg", true))() -- Dodge Mirage
+loadstring(game:HttpGet("https://raw.githubusercontent.com/floorshoelace/cofwkasc3t2okwpl3t4wef234wefdse4fewvds32rfewds3r2tfeads3qfeavdsgt4wrbsfuhrtg/refs/heads/main/bkaswd", true))() -- Backpack
+
+plr = game.Players.LocalPlayer
+mouse = plr:GetMouse()
+mouse.KeyDown:connect(function(key)
+if key == "t" then
+
+local args = {
+    [1] = false
+}
+
+game:GetService("Players").LocalPlayer.Backpack.ServerTraits.AFK:FireServer(unpack(args))
+
+
+
+
+end
+end)
+
+plr = game.Players.LocalPlayer
+mouse = plr:GetMouse()
+mouse.KeyDown:connect(function(key)
+if key == "y" then
+
+local args = {
+    [1] = true
+}
+
+game:GetService("Players").LocalPlayer.Backpack.ServerTraits.AFK:FireServer(unpack(args))
+
+
+
+
+end
+end)
+
+plr = game.Players.LocalPlayer
+mouse = plr:GetMouse()
+mouse.KeyDown:connect(function(key)
+if key == "y" then
+
+local function disablePodiumCamera()
+    local camera = workspace.CurrentCamera
+    camera.CameraType = Enum.CameraType.Custom -- Ensures camera isn't locked
+    
+    -- Override camera updates (common method to prevent forced focus)
+    local con
+    con = game:GetService("RunService").RenderStepped:Connect(function()
+        camera.CameraType = Enum.CameraType.Custom
+        if camera.CameraSubject then
+            -- Optional: Force camera to follow player instead
+            local player = game.Players.LocalPlayer
+            if player and player.Character and player.Character:FindFirstChild("Humanoid") then
+                camera.CameraSubject = player.Character.Humanoid
+            end
+        end
+    end)
+    
+    -- Disconnect when needed (optional cleanup)
+    return con
+end
+
+-- Run the function
+disablePodiumCamera()
+
+
+
+end
+end)
