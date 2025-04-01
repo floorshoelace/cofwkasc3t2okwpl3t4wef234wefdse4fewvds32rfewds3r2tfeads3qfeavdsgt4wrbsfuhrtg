@@ -1,0 +1,330 @@
+local plr = game:GetService("Players").LocalPlayer
+local mouse = plr:GetMouse()
+local UIS = game:GetService("UserInputService")
+local workspaceLive = workspace:WaitForChild("Live") -- Cache workspace.Live
+
+-- Tool list (unchanged)
+local tools = {
+	"Gem Shot", "Demon Barrage", "Demon Gun", "Supreme Genes",  "Predator Wings", "Ripple Fisticuffs", "This cannot be!", "Headbutt Series", "Spirit Gun ",
+	"Cleaving Strikes ", "Kick Barrage ", "Enkidu", "Gates of Babylon", "Heaven's Throne",
+	"Enuma Elish", "Noble Phantasm", "Maana Blast ", "Rho Aias ", "Jet Gatling",
+	"Jet Bazooka", "Jet Pistol", "Gear Third", "Mortal Flame Fist", "Darkness Flame Dragon",
+	"Darkness Flame Sword", "Mortal Flamethrower", "Stand Rush ", "The World", "Stand Leap",
+	"Beatdown", "Return to Zero", "7 Page Muda", "Monologue", "Scorpion Laser",
+	"Angry Kamehameha", "Super Rush", "Meteor Smash", "Spirit Bomb", "Perfect Susanoo Chidori",
+	"Amaterasu Volley", "Onyx Chidori", "Amaterasu Blossom", "Lightning Palm ", "Thunderbolt",
+	"Whirlwind", "Execute", "Amaterasu", "Tsukuyomi", "Yata Mirror", "Totsuka Blade",
+	"Extreme Speed", "Time Accelerated Knives", "Wallace Maneuver", "Time Accelerate",
+	"Final Flash", "Amazing Impact", "Punch Barrage", "Big Bang", "West", "East", "North",
+	"South", "Gae Bolg", "Guts", "Soaring Strikes", "Dry Freeze", "Ice Crater", "Ice Skating", "Gently Weeps", "Dark Matter Blaze", "Nergal Blast", "Kanntwinkle", "Bonk",
+	"Onigiri/Sanzen Sekai", "Tatsumaki", "Hyakuhachi Pound Ho", "Yasha Garasu", "Getsuga Tensho ", "Getsuga Slash ",
+	"Multi-Cut ", "Lunge ", "Great Fireball Jutsu", "Black Chidori", "Drill Kick", "Dragon Breath Jutsu",
+	"Ice Guard", "Ice Quake", "Minus 10", "Absolute Zero", "Triple Snipe", "Megumin", "Aqua!", "Drain Touch",
+	"Collier ", "Frit Assorti ", "Spectre ", "Table Party ", "Light Grenade", "After Image", "Special Beam Cannon ", "Super Demon Wave",
+	"Counter!", "Kamui", "Lightning Hound", "Raikiri", "Cero", "Sakanade", "Slash ", "Breaker ", "Temporal Rift",
+	"Arise", "Monarch's Wrath", "Endless Eclipse", "Counter Cut ", "Dash", "Phantom Blade", "Revenge", "TAKT",
+	"Shambles", "Radio Knife", "Mes", "Destructo Disk Barrage", "Super Kamehameha", "Senzu Bean", "Goku", "Great Hurricane",
+	"REVERSE LOTUS", "Body Flicker", "TEN TEN", "Flood", "Scatter ", "Gokei", "Flashstep ", "Love Detective",
+	"Newspaper Barrage", "Sing", "Desk Smash", "Logia Reflex", "Flame Emperor", "Fire Gun ", "Fire Fist ",
+	"Uppercut ", "Ki Barrage", "Ultimate Rush", "Father Son Kame", "Explosive Kunais", "128 Palms", "Great Rotation",
+	"Air Barrage", "Bushogoma X", "Kageoni ", "Irooni", "Takaoni ", "Jets", "Jet Culverin", "Black Mamba", "King Cobra",
+	"Super Kamehameha", "Instant Transmission", "Meteor Smash", "Super Spirit Bomb", "Water Dragon", "Decapitate ", "Haku",
+	"Hiding in Mist ", "Gran Rey Cero", "Pantera Combo", "Panther King Claw", "Panther Barbs", "Dash", "Tornado",
+	"Scissor Combo", "Decapitation", "Grand Tatsu Maki", "Nigiri Ripple", "1080 Caliber Pheonix", "Six Paths", "Burning Attack.",
+	"After Image", "Heat Dome Attack", "Shining Sword Attack", "Sand Coffin ", "Sand Shower", "Great Tsunami", "Sand Spears",
+	"Kurose", "Null Steps", "Shoot to Kill ", "Sweep ", "Hurricane Spin", "Wild Leap", "Red Cannon", "ZODD", "Cloak",
+	"Kick Barrage", "Blitz", "Soba Kick", "Z Vanish", "Ultra Crush Cannon", "Super Burst Energy", "Meteor Crash", "Kirin",
+	"Chidori Lament", "Black Chidori", "White Snake Binding", "Wolves", "Bull Thrust", "Black Slash Overload", "Anti-Magic Counter",
+	"BLACK DIVIDER", "Yata Mirror ", "Heaven Sword", "Heavy Kick", "Yasakani Jewels", "Ki Blitz Barrage", "Headbutt", "Suprise",
+	"Final Impact", "Odama Rasengan", "Chōōdama Rasengan", "Shadow Clones ", "Rasenshuriken", "Ice Daggers", "Ice Prison",
+	"Ice Doll", "Dragon Flower", "Magma Pillar", "Plume Punch", "Great Eruption", "Magma Fist", "Savage Kicks", "Banshee Blast",
+	"Super Spirit Sword", "Final Kamehameha", "Cero Oscuras", "Spear", "Wing Attack", "Slice ", "Spirit Gun ", "Demon Gun", "Demon Barrage",
+	"Headbutt Series", "Gunpowder Star", "Sogeking Snipe", "Jave Rin", "Bagworm", "Death Beam Barrage", "Nova Blast", "Death Saucers",
+	"Telekenesis", "Almighty Push ", "Animal Path", "Pull Combo", "Planetary Devastation", "Cero", "Rear Slice", "Roar", "Pummel", "Accelerate ",
+	"Quake ", "Plasma ", "Redirection ", "Ground Secco", "Desert Grande Espada", "Sables Pesado", "Barjan", "Steady Barrage", "Snipe Shot", "Photon Wave",
+	"Suprise Kick", "Sun & Moon", "Convert", "Order Stamp", "Black Voice", "Asukujaku", "Primary Lotus", "Summoning Jutsu", "Flip Kick", "Hirudora", "Flash Break", "Shunko Barrage", "Raijin Senkei", "rawr", "Tendril",
+	"Magnetism", "Lightning", "Punishment", "Raigo", "100MV Vari", "Amaru", "Thunder  Dragon", "Super Death Beam", "Solar Kamehameha", "Solid Hammer",
+	"Instant Transmission", "Guillotine Drop", "RAIGA BOMB", "Lightning Straight", "Whirlwind Throw", "Ascending Cross", "Reckless Charge", "ICHIMONJI",
+	"Berserk Leap", "Flamy Combo", "Perfect Shot", "Slam Dunk", "Fiery Barrage", "Demon Tile Punch", "Knifehand", "Spear Wave/Ocean Current Throw", "Shoulder Throw",
+	"Autonomous Fist", "Instinct", "Godly Display", "Divine Kame", "Super Shark Bomb Jutsu", "Feast", "Bite", "Search and Destroy", "Tornado", "Grip",
+	"Debris", "Barrier", "Tenjin", "Cognac", "Maser Ho", "Bonbon", "God Burst Rush", "Final Destruction", "Destruction Energy", "Hakai Fist", "V2 Lariat",
+	"Tail Beast Twister", "Giyuki Smash", "Tailed Beast Bomb", "Psychic Binding", "Control Rubble", "Psycho Smash", "Psycho Burst", "Psychic Combo",
+	"Strong Repel", "Swat", "Deflective Shield", "Shigan: Ouren ", "Rankyaku ", "Shigan: Bachi", "Rokuougan", "Comet Strike", "God Punisher",
+	"Punisher Shield", "Stardust Combo", "Perfect Susanoo Chidori", "Amaterasu Volley", "Onyx Chidori", "Amaterasu Blossom", "KUROHITSUGI", "Kyoka Suigetsu ",
+	"True Power ", "Teleport", "Light Spear", "Angelic Wings", "Light Explosion", "Judgement", "Ice Age", "Ice Ball", "Pheasant Beak ", "Frost Vanish", "Saiyan Spirit",
+	"Tyrant Lancer", "Dragon Throw", "Change The Future", "Flying Thunder God ", "Odama Combo", "Odama Rasengan",
+	"Flying Thunder God: Space–Time Hurricane Flash Sequential Steps: Style Zero", "Pink Cannon", "Shield", "Kuyoshibari",
+	"Cry", "Dragon Hunting Flash ", "Dragon Hunting Fangs", "Unstoppable Hunt", "Saint Beatdown", "Dragon Hunting Flash ",
+	"Dragon Hunting Fangs", "Unstoppable Hunt", "Twin Hunting Flash", "Future Sight", "Galaxy Impact: Blue", "Time Stop", "Blue Infusion",
+	"Gigantic Roar", "Meteor Shower", "SLAM JAM", "Double Eraser Cannon", "Burning Forest", "Susanoo Rush ", "Susanoo Clones", "Tengai Shinsei", "Maka Chop", "Grigori",
+	"Demon Hunt", "Black Blood", "Hao", "Future Sight", "Quick Draw ", "Divine Departure", "Sickle of Sorrow", "Super Black Kamehameha", "Sudden Death Beam", "Divine Lasso",
+	"Impaler", "Giant's Slash", "Berserker Blast", "Shockwave", "Madness Impact", "Nine Lives", "River of Crimson", "Card Throw/Magic Bullet", "Vampiric Strength", "Raging Assault", "Feast", "Spear Hand", "Pole Smash", "Helmet Breaker",
+	"Mega Sweep", "Island Shaking", "Chinqeng", "Resentment", "Fierce Corpses", "Wen Ning", "Sunlight Slicer OD", "Breathe ", "Sendo Ripple OD", "Scarlet Overdrive",
+	"Manchester Smash", "Shoot Style: Leap", "St. Louis Smash", "1,000,000% SMASH", "String Trick", "Clacker Overdrive", "Your Next Line is", "Aja Stone Beam", "Reversal Red",
+	"Hollow Purple", "Blue: Max Output", "Limitless", "AP  Shot Barrage", "Turbo Rush", "Explode-A-Pult", "Howitzer Impact", "Bungee Flail ", "Bungee Gum ", "Texture Surprise",
+	"Card Throw ", "★Idol Punch★", "❤True Heart Strikes❤", "★Tantaka~tan★", "Final Boogie", "Texas Smash", "Detroit Smash", "Oklahoma Smash", "Carolina Smash", "Blumenbatt",
+	"Circle Sword", "Moon Flash ", "Pulverizing Pulls", "Erasure Barrage", "Warping Leaps", "Dropkick Elimination", "Adamantine Barrier", "Demon Geyser", "Destruction Fist", "Zeroth Bow", "Zeroth Longsword", "Firing Hammer", "Lightning Flame Roar", "Crimson Blade",
+	"Brilliant Flame", "Space Bowabunga", "Chains Grabs", "Chain Rupture", "Hug", "Ricochet", "Full Auto", "Close-Range Blast", "Bullet Storm", "Flame Dance", "Beneficent Radiance",
+	"Solar Heat Haze", "Clear Blue Sky", "Constant Resounding Slash", "Assistance", "String Performance: Rhythm", "Perfect Tempo", "Overdrive ", "Jeep", "Grapple ", "Secret Technique ",
+	"Dashes", "Needle Barage", "Hm?", "Bloodlust", "Shrine ", "Axe Kick", "Ravager", "Divine Blessing", "Flashfreeze Heatwave", "Wall of Flames", "Giant Ice Wall", "Ice Path", "Rapid Fire ",
+	"Rocket Launcher", "Maiya", "Square Accel", "Dora Barrage X", "DORAAA!!!", "Hair Rage", "Homing Shard", "Crimson Blockade", "Slicing Exorcism: Flood", "Chakram Barrage",
+	"Supernova", "Jet Kick", "Engine Dash", "Downkick", "Recipro Flurry", "Light Squid Assault", "Cyclops Punches", "Rainbow Dragon", "Am I pretty?", "Flare Blitz", "Hell Spider",
+	"Incinerate", "PROMINENCE BURN", "Stand Rush ", "Grab", "Bites the Dust", "Air Bubble", "Bisecting Slash", "7:3 Combo", "Hair Grab", "Ratio Collapse", "Shoot Style: Leap",
+	"Consecutive Normal Punches", "100% Manchester Smash","Torrential Downpour Warning", "Heavy Weather!", "Cloud Suit", "Atmospheric Alteration", "Wyoming Smash", "Burn Barrage", "Left Gun", "Cero Metralleta", "Right Gun", "String Grab", "Unravel", "Stitch", "Sabbath", "Ragnarok", "Black Ops",
+	"Twilight Claws", "EX Shield Toss", "Shimmer", "Counter", "Perforate", "Assassinate", "Bunker BREAKER", "EX Stunning Strike", "Rasengan ", "Claw", "Roar", "Chakra Arm", "Cover", "Fa Jin", "Manchester Axe Kick", "Faux 100% Manchester Smash", "Smashing Beatdown", "Six Shooter",
+	"Swarming Shot", "Ricochet Shot", "Hanged Man", "Gentleman's Greeting", "Martial Arts/Stab", "Right To The Bone!", "Shoulder Crash", "Lunge "
+}
+
+-- Equip/Unequip Function (optimized)
+local function handleToolTransfer(key, toCharacter)
+	local source = toCharacter and plr.Backpack or plr.Character
+	local destination = toCharacter and plr.Character or plr.Backpack
+	for _, toolName in ipairs(tools) do
+		local tool = source:FindFirstChild(toolName)
+		if tool then
+			tool.Parent = destination
+		end
+	end
+end
+
+-- Input Handling for Equip/Unequip
+mouse.KeyDown:Connect(function(key)
+	if key == "c" then handleToolTransfer(key, true) end
+	if key == "v" then handleToolTransfer(key, false) end
+end)
+
+-- Target Finding (optimized)
+local function findClosestHumanoid()
+	local closest, minDistance = nil, math.huge
+	local plrRoot = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+	if not plrRoot then return nil end
+
+	for _, obj in pairs(workspaceLive:GetChildren()) do
+		if obj.Name ~= plr.Name and obj.Name ~= "ShadowHealerNPC" and obj.Name ~= "ShadowKnightNPC" and 
+		   obj.Name ~= "ShadowMageNPC" and not string.find(obj.Name, "^Mahoraga_") then
+			local humanoid = obj:FindFirstChildOfClass("Humanoid")
+			local rootPart = obj:FindFirstChild("HumanoidRootPart")
+			if humanoid and rootPart then
+				local distance = (rootPart.Position - plrRoot.Position).Magnitude
+				if distance < minDistance then
+					closest, minDistance = obj, distance
+				end
+			end
+		end
+	end
+	return closest
+end
+
+-- Ability Activation Mappings (restored explicit structure)
+local toolMappings = {
+	{[Enum.KeyCode.One] = "Spirit Gun ", [Enum.KeyCode.Two] = "Demon Gun", [Enum.KeyCode.Three] = "Demon Barrage", [Enum.KeyCode.Five] = "Headbutt Series"},
+	{[Enum.KeyCode.One] = "Gentleman's Greeting", [Enum.KeyCode.Two] = "Martial Arts/Stab", [Enum.KeyCode.Three] = "Right To The Bone!", [Enum.KeyCode.Five] = "Shoulder Crash"},
+	{[Enum.KeyCode.One] = "Torrential Downpour Warning", [Enum.KeyCode.Two] = "Heavy Weather!", [Enum.KeyCode.Three] = "Cloud Suit", [Enum.KeyCode.Five] = "Atmospheric Alteration"},
+	{[Enum.KeyCode.One] = "Supreme Genes", [Enum.KeyCode.Two] = "Predator Wings", [Enum.KeyCode.Three] = "Ripple Fisticuffs", [Enum.KeyCode.Five] = "This cannot be!"},
+	{[Enum.KeyCode.Six] = "Shimmer", [Enum.KeyCode.Two] = "Counter", [Enum.KeyCode.Three] = "Perforate", [Enum.KeyCode.Five] = "Assassinate"},
+	{[Enum.KeyCode.One] = "Rasengan ", [Enum.KeyCode.Two] = "Claw", [Enum.KeyCode.Three] = "Roar", [Enum.KeyCode.Five] = "Chakra Arm"},
+	{[Enum.KeyCode.One] = "Pulverizing Pulls", [Enum.KeyCode.Two] = "Erasure Barrage", [Enum.KeyCode.Three] = "Warping Leaps", [Enum.KeyCode.Five] = "Dropkick Elimination"},
+	{[Enum.KeyCode.One] = "Dry Freeze", [Enum.KeyCode.Two] = "Ice Crater", [Enum.KeyCode.Three] = "Ice Skating", [Enum.KeyCode.Five] = "Gently Weeps"},
+	{[Enum.KeyCode.One] = "Noble Phantasm", [Enum.KeyCode.Two] = "Maana Blast ", [Enum.KeyCode.Three] = "Gem Shot", [Enum.KeyCode.Five] = "Kick Barrage "},
+	{[Enum.KeyCode.One] = "Sun & Moon", [Enum.KeyCode.Two] = "Convert", [Enum.KeyCode.Three] = "Order Stamp", [Enum.KeyCode.Five] = "Black Voice"},
+	{[Enum.KeyCode.One] = "Berserker Blast", [Enum.KeyCode.Two] = "Shockwave", [Enum.KeyCode.Three] = "Madness Impact", [Enum.KeyCode.Five] = "Nine Lives"},
+	{[Enum.KeyCode.One] = "Gae Bolg", [Enum.KeyCode.Two] = "Guts", [Enum.KeyCode.Three] = "Soaring Strikes", [Enum.KeyCode.Five] = "Lunge "},
+	{[Enum.KeyCode.One] = "Jet Gatling", [Enum.KeyCode.Two] = "Jet Bazooka", [Enum.KeyCode.Three] = "Jet Pistol", [Enum.KeyCode.Five] = "Gear Third"},
+	{[Enum.KeyCode.One] = "Mortal Flame Fist", [Enum.KeyCode.Two] = "Mortal Flamethrower", [Enum.KeyCode.Three] = "Darkness Flame Sword", [Enum.KeyCode.Five] = "Darkness Flame Dragon"},
+	{[Enum.KeyCode.One] = "Return to Zero", [Enum.KeyCode.Two] = "7 Page Muda", [Enum.KeyCode.Three] = "Monologue", [Enum.KeyCode.Five] = "Scorpion Laser"},
+	{[Enum.KeyCode.One] = "Angry Kamehameha", [Enum.KeyCode.Two] = "Super Rush", [Enum.KeyCode.Three] = "Meteor Smash", [Enum.KeyCode.Five] = "Spirit Bomb"},
+	{[Enum.KeyCode.One] = "Perfect Susanoo Chidori", [Enum.KeyCode.Two] = "Amaterasu Volley", [Enum.KeyCode.Three] = "Onyx Chidori", [Enum.KeyCode.Five] = "Amaterasu Blossom"},
+	{[Enum.KeyCode.One] = "Beatdown", [Enum.KeyCode.Two] = "The World", [Enum.KeyCode.Three] = "Stand Leap", [Enum.KeyCode.Five] = "Stand Rush "},
+	{[Enum.KeyCode.One] = "Lightning Palm ", [Enum.KeyCode.Two] = "Thunderbolt", [Enum.KeyCode.Three] = "Whirlwind", [Enum.KeyCode.Five] = "Execute"},
+	{[Enum.KeyCode.One] = "Amaterasu", [Enum.KeyCode.Two] = "Tsukuyomi", [Enum.KeyCode.Three] = "Yata Mirror", [Enum.KeyCode.Five] = "Totsuka Blade"},
+	{[Enum.KeyCode.One] = "Extreme Speed", [Enum.KeyCode.Two] = "Time Accelerated Knives", [Enum.KeyCode.Three] = "Wallace Maneuver", [Enum.KeyCode.Five] = "Time Accelerate"},
+	{[Enum.KeyCode.One] = "Enuma Elish", [Enum.KeyCode.Two] = "Gates of Babylon", [Enum.KeyCode.Three] = "Heaven's Throne", [Enum.KeyCode.Five] = "Enkidu"},
+	{[Enum.KeyCode.One] = "Final Flash", [Enum.KeyCode.Two] = "Big Bang", [Enum.KeyCode.Three] = "Punch Barrage", [Enum.KeyCode.Five] = "Amazing Impact"},
+	{[Enum.KeyCode.One] = "North", [Enum.KeyCode.Two] = "South", [Enum.KeyCode.Three] = "hehe", [Enum.KeyCode.Five] = "ticklemepls"},
+	{[Enum.KeyCode.One] = "Dark Matter Blaze", [Enum.KeyCode.Two] = "Nergal Blast ", [Enum.KeyCode.Three] = "Kanntwinkle", [Enum.KeyCode.Five] = "Bonk"},
+	{[Enum.KeyCode.One] = "Onigiri/Sanzen Sekai", [Enum.KeyCode.Two] = "Tatsumaki", [Enum.KeyCode.Three] = "Hyakuhachi Pound Ho", [Enum.KeyCode.Five] = "Yasha Garasu"},
+	{[Enum.KeyCode.One] = "Getsuga Tensho ", [Enum.KeyCode.Two] = "Getsuga Slash ", [Enum.KeyCode.Three] = "Multi-Cut ", [Enum.KeyCode.Five] = "Lunge "},
+	{[Enum.KeyCode.One] = "Great Fireball Jutsu", [Enum.KeyCode.Two] = "Black Chidori", [Enum.KeyCode.Three] = "Drill Kick", [Enum.KeyCode.Five] = "Dragon Breath Jutsu"},
+	{[Enum.KeyCode.One] = "Ice Guard", [Enum.KeyCode.Two] = "Ice Quake ", [Enum.KeyCode.Three] = "Minus 10", [Enum.KeyCode.Five] = "Absolute Zero"},
+	{[Enum.KeyCode.One] = "Triple Snipe", [Enum.KeyCode.Two] = "Megumin", [Enum.KeyCode.Three] = "Aqua!", [Enum.KeyCode.Five] = "Drain Touch"},
+	{[Enum.KeyCode.One] = "Collier ", [Enum.KeyCode.Two] = "Frit Assorti ", [Enum.KeyCode.Three] = "Spectre ", [Enum.KeyCode.Five] = "Table Party "},
+	{[Enum.KeyCode.One] = "Light Grenade", [Enum.KeyCode.Two] = "After Image", [Enum.KeyCode.Three] = "Special Beam Cannon ", [Enum.KeyCode.Five] = "Super Demon Wave"},
+	{[Enum.KeyCode.One] = "Counter!", [Enum.KeyCode.Two] = "Kamui", [Enum.KeyCode.Three] = "Lightning Hound", [Enum.KeyCode.Five] = "Raikiri"},
+	{[Enum.KeyCode.One] = "Cero", [Enum.KeyCode.Two] = "Sakanade", [Enum.KeyCode.Three] = "Slash ", [Enum.KeyCode.Five] = "Breaker "},
+	{[Enum.KeyCode.One] = "Temporal Rift", [Enum.KeyCode.Two] = "Arise", [Enum.KeyCode.Three] = "Monarch's Wrath", [Enum.KeyCode.Five] = "Endless Eclipse"},
+	{[Enum.KeyCode.One] = "Counter Cut ", [Enum.KeyCode.Two] = "Dash", [Enum.KeyCode.Three] = "Phantom Blade", [Enum.KeyCode.Five] = "Revenge"},
+	{[Enum.KeyCode.One] = "TAKT", [Enum.KeyCode.Two] = "Shambles", [Enum.KeyCode.Three] = "Radio Knife", [Enum.KeyCode.Five] = "Mes"},
+	{[Enum.KeyCode.One] = "Destructo Disk Barrage", [Enum.KeyCode.Two] = "Super Kamehameha ", [Enum.KeyCode.Three] = "Senzu Bean", [Enum.KeyCode.Five] = "Goku"},
+	{[Enum.KeyCode.One] = "Shrine ", [Enum.KeyCode.Two] = "Axe Kick", [Enum.KeyCode.Three] = "Ravager", [Enum.KeyCode.Five] = "Divine Blessing"},
+	{[Enum.KeyCode.One] = "Flashfreeze Heatwave", [Enum.KeyCode.Two] = "Wall of Flames", [Enum.KeyCode.Three] = "Giant Ice Wall", [Enum.KeyCode.Five] = "Ice Path"},
+	{[Enum.KeyCode.One] = "Rapid Fire ", [Enum.KeyCode.Two] = "Rocket Launcher", [Enum.KeyCode.Three] = "Maiya", [Enum.KeyCode.Five] = "Square Accel"},
+	{[Enum.KeyCode.One] = "Dora Barrage X", [Enum.KeyCode.Two] = "DORAAA!!!", [Enum.KeyCode.Three] = "Hair Rage", [Enum.KeyCode.Five] = "Homing Shard"},
+	{[Enum.KeyCode.One] = "Crimson Blockade", [Enum.KeyCode.Two] = "Slicing Exorcism: Flood", [Enum.KeyCode.Three] = "Chakram Barrage", [Enum.KeyCode.Five] = "Supernova"},
+	{[Enum.KeyCode.One] = "Jet Kick", [Enum.KeyCode.Two] = "Engine Dash", [Enum.KeyCode.Three] = "Downkick", [Enum.KeyCode.Five] = "Recipro Flurry"},
+	{[Enum.KeyCode.One] = "Light Squid Assault", [Enum.KeyCode.Two] = "Cyclops Punches", [Enum.KeyCode.Three] = "Rainbow Dragon", [Enum.KeyCode.Five] = "Am I pretty?"},
+	{[Enum.KeyCode.One] = "Flare Blitz", [Enum.KeyCode.Two] = "Hell Spider", [Enum.KeyCode.Three] = "Incinerate", [Enum.KeyCode.Five] = "PROMINENCE BURN"},
+	{[Enum.KeyCode.One] = "Stand Rush ", [Enum.KeyCode.Two] = "Grab", [Enum.KeyCode.Three] = "Bites the Dust", [Enum.KeyCode.Five] = "Air Bubble"},
+	{[Enum.KeyCode.One] = "Bisecting Slash", [Enum.KeyCode.Two] = "7:3 Combo", [Enum.KeyCode.Three] = "Hair Grab", [Enum.KeyCode.Five] = "Ratio Collapse"},
+	{[Enum.KeyCode.One] = "Shoot Style: Leap", [Enum.KeyCode.Two] = "Consecutive Normal Punches", [Enum.KeyCode.Three] = "100% Manchester Smash", [Enum.KeyCode.Five] = "Wyoming Smash"},
+	{[Enum.KeyCode.One] = "Burn Barrage", [Enum.KeyCode.Two] = "String Grab", [Enum.KeyCode.Three] = "Unravel", [Enum.KeyCode.Five] = "Stitch"},
+	{[Enum.KeyCode.One] = "Sabbath", [Enum.KeyCode.Two] = "Ragnarok", [Enum.KeyCode.Three] = "Black Ops", [Enum.KeyCode.Five] = "Twilight Claws"},
+	{[Enum.KeyCode.One] = "EX Shield Toss", [Enum.KeyCode.Two] = "Bunker BREAKER", [Enum.KeyCode.Three] = "EX Stunning Strike", [Enum.KeyCode.Five] = "Cover"},
+	{[Enum.KeyCode.One] = "Fa Jin", [Enum.KeyCode.Two] = "Manchester Axe Kick", [Enum.KeyCode.Three] = "Faux 100% Manchester Smash", [Enum.KeyCode.Five] = "Smashing Beatdown"},
+	{[Enum.KeyCode.One] = "Six Shooter", [Enum.KeyCode.Two] = "Swarming Shot", [Enum.KeyCode.Three] = "Ricochet Shot", [Enum.KeyCode.Five] = "Hanged Man"},
+	{[Enum.KeyCode.One] = "Light Spear", [Enum.KeyCode.Two] = "Angelic Wings", [Enum.KeyCode.Three] = "Light Explosion", [Enum.KeyCode.Five] = "Judgement"},
+	{[Enum.KeyCode.One] = "Ice Age", [Enum.KeyCode.Two] = "Ice Ball", [Enum.KeyCode.Three] = "Pheasant Beak ", [Enum.KeyCode.Five] = "Frost Vanish"},
+	{[Enum.KeyCode.One] = "Saiyan Spirit", [Enum.KeyCode.Two] = "Tyrant Lancer", [Enum.KeyCode.Three] = "Dragon Throw", [Enum.KeyCode.Five] = "Change The Future"},
+	{[Enum.KeyCode.One] = "Flying Thunder God ", [Enum.KeyCode.Two] = "Odama Combo", [Enum.KeyCode.Three] = "Odama Rasengan", [Enum.KeyCode.Five] = "Flying Thunder God: Space–Time Hurricane Flash Sequential Steps: Style Zero"},
+	{[Enum.KeyCode.One] = "Pink Cannon", [Enum.KeyCode.Two] = "Shield", [Enum.KeyCode.Three] = "Kuyoshibari", [Enum.KeyCode.Five] = "Cry"},
+	{[Enum.KeyCode.One] = "Dragon Hunting Flash ", [Enum.KeyCode.Two] = "Dragon Hunting Fangs", [Enum.KeyCode.Three] = "Unstoppable Hunt", [Enum.KeyCode.Five] = "Saint Beatdown"},
+	{[Enum.KeyCode.One] = "Dragon Hunting Flash ", [Enum.KeyCode.Two] = "Dragon Hunting Fangs", [Enum.KeyCode.Three] = "Unstoppable Hunt", [Enum.KeyCode.Five] = "Twin Hunting Flash"},
+	{[Enum.KeyCode.One] = "Future Sight", [Enum.KeyCode.Two] = "Galaxy Impact: Blue", [Enum.KeyCode.Three] = "Time Stop", [Enum.KeyCode.Five] = "Blue Infusion"},
+	{[Enum.KeyCode.One] = "Gigantic Roar", [Enum.KeyCode.Two] = "Meteor Shower", [Enum.KeyCode.Three] = "SLAM JAM", [Enum.KeyCode.Five] = "Double Eraser Cannon"},
+	{[Enum.KeyCode.One] = "Burning Forest", [Enum.KeyCode.Two] = "Susanoo Rush ", [Enum.KeyCode.Three] = "Susanoo Clones", [Enum.KeyCode.Five] = "Tengai Shinsei"},
+	{[Enum.KeyCode.One] = "Maka Chop", [Enum.KeyCode.Two] = "Grigori", [Enum.KeyCode.Three] = "Demon Hunt", [Enum.KeyCode.Five] = "Black Blood"},
+	{[Enum.KeyCode.One] = "Hao", [Enum.KeyCode.Two] = "Future Sight", [Enum.KeyCode.Three] = "Quick Draw ", [Enum.KeyCode.Five] = "Divine Departure"},
+	{[Enum.KeyCode.One] = "Sickle of Sorrow", [Enum.KeyCode.Two] = "Super Black Kamehameha", [Enum.KeyCode.Three] = "Sudden Death Beam", [Enum.KeyCode.Five] = "Divine Lasso"},
+	{[Enum.KeyCode.One] = "Impaler", [Enum.KeyCode.Two] = "Giant's Slash", [Enum.KeyCode.Three] = "River of Crimson", [Enum.KeyCode.Five] = "Card Throw/Magic Bullet"},
+	{[Enum.KeyCode.One] = "Vampiric Strength", [Enum.KeyCode.Two] = "Raging Assault", [Enum.KeyCode.Three] = "Feast", [Enum.KeyCode.Five] = "Spear Hand"},
+	{[Enum.KeyCode.One] = "Pole Smash", [Enum.KeyCode.Two] = "Helmet Breaker", [Enum.KeyCode.Three] = "Mega Sweep", [Enum.KeyCode.Five] = "Island Shaking"},
+	{[Enum.KeyCode.One] = "Chinqeng", [Enum.KeyCode.Two] = "Resentment", [Enum.KeyCode.Three] = "Fierce Corpses", [Enum.KeyCode.Five] = "Wen Ning"},
+	{[Enum.KeyCode.One] = "Sunlight Slicer OD", [Enum.KeyCode.Two] = "Breathe ", [Enum.KeyCode.Three] = "Sendo Ripple OD", [Enum.KeyCode.Five] = "Scarlet Overdrive"},
+	{[Enum.KeyCode.One] = "Manchester Smash", [Enum.KeyCode.Two] = "Shoot Style: Leap", [Enum.KeyCode.Three] = "St. Louis Smash", [Enum.KeyCode.Five] = "1,000,000% SMASH"},
+	{[Enum.KeyCode.One] = "Reversal Red", [Enum.KeyCode.Two] = "Hollow Purple", [Enum.KeyCode.Three] = "Blue: Max Output", [Enum.KeyCode.Five] = "Limitless"},
+	{[Enum.KeyCode.One] = "AP Shot Barrage", [Enum.KeyCode.Two] = "Turbo Rush", [Enum.KeyCode.Three] = "Explode-A-Pult", [Enum.KeyCode.Five] = "Howitzer Impact"},
+	{[Enum.KeyCode.One] = "Bungee Flail ", [Enum.KeyCode.Two] = "Bungee Gum ", [Enum.KeyCode.Three] = "Texture Surprise", [Enum.KeyCode.Five] = "Card Throw"},
+	{[Enum.KeyCode.One] = "Final Boogie", [Enum.KeyCode.Two] = "Final Boogie", [Enum.KeyCode.Three] = "Final Boogie", [Enum.KeyCode.Five] = "Final Boogie"},
+	{[Enum.KeyCode.One] = "Texas Smash", [Enum.KeyCode.Two] = "Detroit Smash", [Enum.KeyCode.Three] = "Oklahoma Smash", [Enum.KeyCode.Five] = "Carolina Smash"},
+	{[Enum.KeyCode.One] = "Blumenbatt", [Enum.KeyCode.Two] = "Circle Sword", [Enum.KeyCode.Three] = "Moon Flash ", [Enum.KeyCode.Five] = "Adamantine Barrier"},
+	{[Enum.KeyCode.One] = "Demon Geyser", [Enum.KeyCode.Two] = "Destruction Fist", [Enum.KeyCode.Three] = "Zeroth Bow", [Enum.KeyCode.Five] = "Zeroth Longsword"},
+	{[Enum.KeyCode.One] = "Firing Hammer", [Enum.KeyCode.Two] = "Lightning Flame Roar", [Enum.KeyCode.Three] = "Crimson Blade", [Enum.KeyCode.Five] = "Brilliant Flame"},
+	{[Enum.KeyCode.One] = "God Burst Rush", [Enum.KeyCode.Two] = "Final Destruction", [Enum.KeyCode.Three] = "Destruction Energy", [Enum.KeyCode.Five] = "Hakai Fist"},
+	{[Enum.KeyCode.One] = "Space Bowabunga", [Enum.KeyCode.Two] = "Chains Grabs", [Enum.KeyCode.Three] = "Chain Rupture", [Enum.KeyCode.Five] = "Hug"},
+	{[Enum.KeyCode.One] = "Ricochet", [Enum.KeyCode.Two] = "Full Auto", [Enum.KeyCode.Three] = "Close-Range Blast", [Enum.KeyCode.Five] = "Bullet Storm"},
+	{[Enum.KeyCode.One] = "Flame Dance", [Enum.KeyCode.Two] = "Beneficent Radiance", [Enum.KeyCode.Three] = "Solar Heat Haze", [Enum.KeyCode.Five] = "Clear Blue Sky"},
+	{[Enum.KeyCode.One] = "Constant Resounding Slash", [Enum.KeyCode.Two] = "Assistance", [Enum.KeyCode.Three] = "String Performance: Rhythm", [Enum.KeyCode.Five] = "Perfect Tempo"},
+	{[Enum.KeyCode.One] = "Overdrive ", [Enum.KeyCode.Two] = "Jeep", [Enum.KeyCode.Three] = "Grapple ", [Enum.KeyCode.Five] = "Secret Technique "},
+	{[Enum.KeyCode.One] = "Dashes", [Enum.KeyCode.Two] = "Needle Barage", [Enum.KeyCode.Three] = "Hm?", [Enum.KeyCode.Five] = "Bloodlust"},
+	{[Enum.KeyCode.One] = "Yata Mirror ", [Enum.KeyCode.Two] = "Heaven Sword", [Enum.KeyCode.Three] = "Heavy Kick", [Enum.KeyCode.Five] = "Yasakani Jewels"},
+	{[Enum.KeyCode.One] = "Ki Blitz Barrage", [Enum.KeyCode.Two] = "Headbutt", [Enum.KeyCode.Three] = "Suprise", [Enum.KeyCode.Five] = "Final Impact"},
+	{[Enum.KeyCode.One] = "Odama Rasengan", [Enum.KeyCode.Two] = "Chōōdama Rasengan", [Enum.KeyCode.Three] = "Shadow Clones ", [Enum.KeyCode.Five] = "Rasenshuriken"},
+	{[Enum.KeyCode.One] = "Ice Daggers", [Enum.KeyCode.Two] = "Black Chidori", [Enum.KeyCode.Three] = "Drill Kick", [Enum.KeyCode.Five] = "Dragon Breath Jutsu"},
+	{[Enum.KeyCode.One] = "Ice Guard", [Enum.KeyCode.Two] = "Ice Prison", [Enum.KeyCode.Three] = "Ice Doll", [Enum.KeyCode.Five] = "Dragon Flower"},
+	{[Enum.KeyCode.One] = "Magma Pillar", [Enum.KeyCode.Two] = "Plume Punch", [Enum.KeyCode.Three] = "Great Eruption", [Enum.KeyCode.Five] = "Magma Fist"},
+	{[Enum.KeyCode.One] = "Savage Kicks", [Enum.KeyCode.Two] = "Banshee Blast", [Enum.KeyCode.Three] = "Super Spirit Sword", [Enum.KeyCode.Five] = "Final Kamehameha"},
+	{[Enum.KeyCode.One] = "Cero Oscuras", [Enum.KeyCode.Two] = "Spear", [Enum.KeyCode.Three] = "Wing Attack", [Enum.KeyCode.Five] = "Slice "},
+	{[Enum.KeyCode.One] = "Gunpowder Star", [Enum.KeyCode.Two] = "Sogeking Snipe", [Enum.KeyCode.Three] = "Jave Rin", [Enum.KeyCode.Five] = "Bagworm"},
+	{[Enum.KeyCode.One] = "Almighty Push ", [Enum.KeyCode.Two] = "Animal Path", [Enum.KeyCode.Three] = "Pull Combo", [Enum.KeyCode.Five] = "Planetary Devastation"},
+	{[Enum.KeyCode.One] = "Cero", [Enum.KeyCode.Two] = "Rear Slice", [Enum.KeyCode.Three] = "Roar", [Enum.KeyCode.Five] = "Pummel"},
+	{[Enum.KeyCode.One] = "Accelerate ", [Enum.KeyCode.Two] = "Quake ", [Enum.KeyCode.Three] = "Plasma ", [Enum.KeyCode.Five] = "Redirection "},
+	{[Enum.KeyCode.One] = "Ground Secco", [Enum.KeyCode.Two] = "Desert Grande Espada", [Enum.KeyCode.Three] = "Sables Pesado", [Enum.KeyCode.Five] = "Barjan"},
+	{[Enum.KeyCode.One] = "Steady Barrage", [Enum.KeyCode.Two] = "Snipe Shot", [Enum.KeyCode.Three] = "Photon Wave", [Enum.KeyCode.Five] = "Suprise Kick"},
+	{[Enum.KeyCode.One] = "Asukujaku", [Enum.KeyCode.Two] = "Primary Lotus", [Enum.KeyCode.Three] = "Summoning Jutsu", [Enum.KeyCode.Five] = "Flip Kick"},
+{[Enum.KeyCode.One] = "Asukujaku", [Enum.KeyCode.Two] = "Hirudora", [Enum.KeyCode.Three] = "Summoning Jutsu", [Enum.KeyCode.Five] = "Flip Kick"},
+	{[Enum.KeyCode.One] = "Flash Break", [Enum.KeyCode.Two] = "Shunko Barrage", [Enum.KeyCode.Three] = "Raijin Senkei", [Enum.KeyCode.Five] = "rawr"},
+	{[Enum.KeyCode.One] = "Tendril", [Enum.KeyCode.Two] = "Magnetism", [Enum.KeyCode.Three] = "Lightning", [Enum.KeyCode.Five] = "Punishment"},
+	{[Enum.KeyCode.One] = "Raigo", [Enum.KeyCode.Two] = "100MV Vari", [Enum.KeyCode.Three] = "Amaru", [Enum.KeyCode.Five] = "Thunder 
+ Dragon"},
+	{[Enum.KeyCode.One] = "Super Death Beam", [Enum.KeyCode.Two] = "Solar Kamehameha", [Enum.KeyCode.Three] = "Solid Hammer", [Enum.KeyCode.Five] = "Instant Transmission"},
+	{[Enum.KeyCode.One] = "Guillotine Drop", [Enum.KeyCode.Two] = "RAIGA BOMB", [Enum.KeyCode.Three] = "Lightning Straight", [Enum.KeyCode.Five] = "Whirlwind Throw"},
+	{[Enum.KeyCode.One] = "Ascending Cross", [Enum.KeyCode.Two] = "Reckless Charge", [Enum.KeyCode.Three] = "ICHIMONJI", [Enum.KeyCode.Five] = "Berserk Leap"},
+	{[Enum.KeyCode.One] = "Flamy Combo", [Enum.KeyCode.Two] = "Perfect Shot", [Enum.KeyCode.Three] = "Slam Dunk", [Enum.KeyCode.Five] = "Fiery Barrage"},
+	{[Enum.KeyCode.One] = "Demon Tile Punch", [Enum.KeyCode.Two] = "Knifehand", [Enum.KeyCode.Three] = "Spear Wave/Ocean Current Throw", [Enum.KeyCode.Five] = "Shoulder Throw"},
+	{[Enum.KeyCode.One] = "Autonomous Fist", [Enum.KeyCode.Two] = "Instinct", [Enum.KeyCode.Three] = "Godly Display", [Enum.KeyCode.Five] = "Divine Kame"},
+	{[Enum.KeyCode.One] = "Super Shark Bomb Jutsu", [Enum.KeyCode.Two] = "Feast", [Enum.KeyCode.Three] = "Bite", [Enum.KeyCode.Five] = "Search and Destroy"},
+	{[Enum.KeyCode.One] = "Tornado", [Enum.KeyCode.Two] = "Grip", [Enum.KeyCode.Three] = "Debris", [Enum.KeyCode.Five] = "Barrier"},
+	{[Enum.KeyCode.One] = "Tenjin", [Enum.KeyCode.Two] = "Cognac", [Enum.KeyCode.Three] = "Maser Ho", [Enum.KeyCode.Five] = "Bonbon"},
+	{[Enum.KeyCode.One] = "V2 Lariat", [Enum.KeyCode.Two] = "Tail Beast Twister", [Enum.KeyCode.Three] = "Giyuki Smash", [Enum.KeyCode.Five] = "Tailed Beast Bomb"},
+	{[Enum.KeyCode.One] = "Psychic Binding", [Enum.KeyCode.Two] = "Control Rubble", [Enum.KeyCode.Three] = "Psycho Smash", [Enum.KeyCode.Five] = "Psycho Burst"},
+	{[Enum.KeyCode.One] = "Psychic Combo", [Enum.KeyCode.Two] = "Strong Repel", [Enum.KeyCode.Three] = "Swat", [Enum.KeyCode.Five] = "Deflective Shield"},
+	{[Enum.KeyCode.One] = "Shigan: Ouren ", [Enum.KeyCode.Two] = "Rankyaku ", [Enum.KeyCode.Three] = "Shigan: Bachi", [Enum.KeyCode.Five] = "Rokuougan"},
+	{[Enum.KeyCode.One] = "Comet Strike", [Enum.KeyCode.Two] = "God Punisher", [Enum.KeyCode.Three] = "Punisher Shield", [Enum.KeyCode.Five] = "Stardust Combo"},
+	{[Enum.KeyCode.One] = "KUROHITSUGI", [Enum.KeyCode.Two] = "Kyoka Suigetsu ", [Enum.KeyCode.Three] = "True Power ", [Enum.KeyCode.Five] = "Teleport"},
+	{[Enum.KeyCode.One] = "Great Hurricane", [Enum.KeyCode.Two] = "REVERSE LOTUS ", [Enum.KeyCode.Three] = "Body Flicker", [Enum.KeyCode.Five] = "TEN TEN"},
+	{[Enum.KeyCode.One] = "Flood", [Enum.KeyCode.Two] = "Scatter ", [Enum.KeyCode.Three] = "Gokei", [Enum.KeyCode.Five] = "Flashstep "},
+	{[Enum.KeyCode.One] = "Love Detective", [Enum.KeyCode.Two] = "Newspaper Barrage", [Enum.KeyCode.Three] = "Sing", [Enum.KeyCode.Five] = "Desk Smash"},
+	{[Enum.KeyCode.One] = "hehe", [Enum.KeyCode.Two] = "tickle feet", [Enum.KeyCode.Three] = "water bottle thrash", [Enum.KeyCode.Five] = "Final Boogie"},
+	{[Enum.KeyCode.One] = "Logia Reflex", [Enum.KeyCode.Two] = "Flame Emperor", [Enum.KeyCode.Three] = "Fire Gun ", [Enum.KeyCode.Five] = "Fire Fist "},
+	{[Enum.KeyCode.One] = "Gran Rey Cero", [Enum.KeyCode.Two] = "Pantera Combo", [Enum.KeyCode.Three] = "Panther King Claw", [Enum.KeyCode.Five] = "Panther Barbs"},
+	{[Enum.KeyCode.One] = "Uppercut ", [Enum.KeyCode.Two] = "Ki Barrage", [Enum.KeyCode.Three] = "Ultimate Rush", [Enum.KeyCode.Five] = "Father Son Kame"},
+	{[Enum.KeyCode.One] = "Explosive Kunais", [Enum.KeyCode.Two] = "128 Palms", [Enum.KeyCode.Three] = "Great Rotation", [Enum.KeyCode.Five] = "Air Barrage"},
+	{[Enum.KeyCode.One] = "Bushogoma X", [Enum.KeyCode.Two] = "Kageoni ", [Enum.KeyCode.Three] = "Irooni", [Enum.KeyCode.Five] = "Takaoni "},
+	{[Enum.KeyCode.One] = "Jets", [Enum.KeyCode.Two] = "Jet Culverin", [Enum.KeyCode.Three] = "Black Mamba", [Enum.KeyCode.Five] = "King Cobra"},
+	{[Enum.KeyCode.One] = "Super Kamehameha", [Enum.KeyCode.Two] = "Instant Transmission", [Enum.KeyCode.Three] = "Meteor Smash", [Enum.KeyCode.Five] = "Super Spirit Bomb"},
+	{[Enum.KeyCode.One] = "Water Dragon", [Enum.KeyCode.Two] = "Decapitate ", [Enum.KeyCode.Three] = "Haku", [Enum.KeyCode.Five] = "Hiding in Mist "},
+	{[Enum.KeyCode.One] = "Dash", [Enum.KeyCode.Two] = "Tornado", [Enum.KeyCode.Three] = "Scissor Combo", [Enum.KeyCode.Five] = "Decapitation"},
+	{[Enum.KeyCode.One] = "Grand Tatsu Maki", [Enum.KeyCode.Two] = "Nigiri Ripple", [Enum.KeyCode.Three] = "1080 Caliber Pheonix", [Enum.KeyCode.Five] = "Six Paths"},
+	{[Enum.KeyCode.One] = "Burning Attack.", [Enum.KeyCode.Two] = "After Image", [Enum.KeyCode.Three] = "Heat Dome Attack", [Enum.KeyCode.Five] = "Shining Sword Attack"},
+	{[Enum.KeyCode.One] = "Sand Coffin ", [Enum.KeyCode.Two] = "Sand Shower", [Enum.KeyCode.Three] = "Great Tsunami", [Enum.KeyCode.Five] = "Sand Spears"},
+	{[Enum.KeyCode.One] = "Kurose", [Enum.KeyCode.Two] = "Null Steps", [Enum.KeyCode.Three] = "Shoot to Kill ", [Enum.KeyCode.Five] = "Sweep "},
+	{[Enum.KeyCode.One] = "Cloak", [Enum.KeyCode.Two] = "Kick Barrage", [Enum.KeyCode.Three] = "Soba Kick", [Enum.KeyCode.Five] = "Blitz"},
+	{[Enum.KeyCode.One] = "Hurricane Spin", [Enum.KeyCode.Two] = "Wild Leap", [Enum.KeyCode.Three] = "ZODD", [Enum.KeyCode.Five] = "Red Cannon"},
+	{[Enum.KeyCode.One] = "Z Vanish", [Enum.KeyCode.Two] = "Ultra Crush Cannon", [Enum.KeyCode.Three] = "Super Burst Energy", [Enum.KeyCode.Five] = "Meteor Crash"},
+	{[Enum.KeyCode.One] = "Wolves", [Enum.KeyCode.Two] = "Wolves", [Enum.KeyCode.Three] = "Wolves", [Enum.KeyCode.Five] = "Wolves"},
+	{[Enum.KeyCode.One] = "Bull Thrust", [Enum.KeyCode.Two] = "Black Slash Overload", [Enum.KeyCode.Three] = "Anti-Magic Counter", [Enum.KeyCode.Five] = "BLACK DIVIDER"},
+	{[Enum.KeyCode.One] = "★Idol Punch★", [Enum.KeyCode.Two] = "❤True Heart Strikes❤", [Enum.KeyCode.Three] = "★Tantaka~tan★", [Enum.KeyCode.Five] = "Final Boogie"},
+	{[Enum.KeyCode.One] = "String Trick", [Enum.KeyCode.Two] = "Clacker Overdrive", [Enum.KeyCode.Three] = "Your Next Line is", [Enum.KeyCode.Five] = "Aja Stone Beam"},
+	{[Enum.KeyCode.One] = "Left Gun", [Enum.KeyCode.Two] = "Cero Metralleta", [Enum.KeyCode.Three] = "Right Gun", [Enum.KeyCode.Five] = "Wolves"},
+	{[Enum.KeyCode.One] = "Kirin", [Enum.KeyCode.Two] = "Chidori Lament", [Enum.KeyCode.Three] = "Black Chidori", [Enum.KeyCode.Five] = "White Snake Binding"},
+	{[Enum.KeyCode.One] = "Death Beam Barrage", [Enum.KeyCode.Two] = "Nova Blast", [Enum.KeyCode.Three] = "Death Saucers", [Enum.KeyCode.Five] = "Telekenesis"},
+}
+
+-- Single Input Handler for Abilities
+UIS.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end -- Skip if input is processed by UI (e.g., chat)
+	local keyCode = input.KeyCode
+	if keyCode ~= Enum.KeyCode.One and keyCode ~= Enum.KeyCode.Two and 
+	   keyCode ~= Enum.KeyCode.Three and keyCode ~= Enum.KeyCode.Five and keyCode ~= Enum.KeyCode.Six then return end
+
+	local target = findClosestHumanoid()
+	if not target then return end
+
+	-- Check each mapping for the pressed key
+	for _, mapping in pairs(toolMappings) do
+		local toolName = mapping[keyCode]
+		if toolName then
+			-- Ensure the tool is equipped before firing
+			local tool = plr.Character:FindFirstChild(toolName) or plr.Backpack:FindFirstChild(toolName)
+			if tool then
+				plr.Backpack.ServerTraits.Input:FireServer("fire", {
+					air = false,
+					targ = target,
+					teamtarg = target,
+					camdir = Vector3.new(-0.941036, -0.0972724, 0.324019),
+					mousehit = CFrame.new(2298.47, 957.799, 212.204),
+					campos = Vector3.new(2381.13, 966.308, 183.744),
+					range = "2",
+					ToolName = toolName
+				})
+				break -- Exit loop after firing the first matching tool
+			end
+		end
+	end
+end)
+
+UIS.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed then
+        local tools = keyToTools[input.KeyCode]
+        if tools then
+            for _, toolName in pairs(tools) do
+                -- Check if the tool is in the character or backpack before firing
+                if (plr.Character and plr.Character:FindFirstChild(toolName)) or 
+                   (plr.Backpack and plr.Backpack:FindFirstChild(toolName)) then
+                    local target = getClosestHumanoid()
+                    if target then
+                        plr.Backpack.ServerTraits.Input:FireServer("fire", {
+                            air = false,
+                            targ = target,
+                            teamtarg = target,
+                            camdir = Vector3.new(-0.941036, -0.0972724, 0.324019),
+                            mousehit = CFrame.new(2298.47, 957.799, 212.204),
+                            campos = Vector3.new(2381.13, 966.308, 183.744),
+                            range = "2",
+                            ToolName = toolName
+                        })
+                    end
+                end
+            end
+        end
+    end
+end)
