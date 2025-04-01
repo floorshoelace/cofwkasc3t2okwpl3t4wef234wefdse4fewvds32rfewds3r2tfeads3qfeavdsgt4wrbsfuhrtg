@@ -1,0 +1,162 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local RootPart = Character:WaitForChild("HumanoidRootPart")
+
+-- Function to reset character state after death
+local function setupCharacter(char)
+    Character = char
+    Humanoid = char:WaitForChild("Humanoid")
+    RootPart = char:WaitForChild("HumanoidRootPart")
+end
+
+-- Initial setup
+setupCharacter(Character)
+
+-- Reapply on respawn
+LocalPlayer.CharacterAdded:Connect(setupCharacter)
+
+-- Dodge Mirage (Keybind H) - Teleports to 3 random spots, 10-45 studs, 0.6 secs total
+local function dodgeMirage()
+    local originalPos = RootPart.CFrame
+    -- Create a mirage clone
+    local mirage = Character:Clone()
+    mirage.Parent = workspace
+    mirage.HumanoidRootPart.CFrame = originalPos
+    mirage.Humanoid.WalkSpeed = 0
+    for _, part in pairs(mirage:GetChildren()) do
+        if part:IsA("BasePart") then
+            part.Transparency = 0.5 -- Semi-transparent mirage
+            part.Anchored = true -- Lock in place
+        end
+    end
+    -- Random directions: left (-X), right (+X), forward (+Z), backward (-Z)
+    local directions = {
+        function() return CFrame.new(-math.random(10, 45), 0, 0) end, -- Left
+        function() return CFrame.new(math.random(10, 45), 0, 0) end,  -- Right
+        function() return CFrame.new(0, 0, math.random(10, 45)) end,  -- Forward
+        function() return CFrame.new(0, 0, -math.random(10, 45)) end  -- Backward
+    }
+    -- Teleport to 3 random spots
+    for i = 1, 3 do
+        local randomDir = directions[math.random(1, 4)]() -- Random direction each time
+        local newPos = originalPos * randomDir
+        RootPart.CFrame = newPos
+        wait(0.2) -- 0.6 secs total (3 * 0.2)
+    end
+    RootPart.CFrame = originalPos -- Return to original spot
+    mirage:Destroy() -- Remove mirage
+    print("Dodge Mirage triggered - Teleported to 3 random spots (10-45 studs)")
+end
+
+-- Keybind Setup
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end -- Ignore if typing in chat
+    if input.KeyCode == Enum.KeyCode.H then
+        spawn(dodgeMirage) -- Run in a new thread to allow spamming
+    end
+end)
+
+print("Script loaded. Use H for Dodge Mirage (spamming enabled).")
+
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- Function to set up or reset the GUI
+local function setupGui()
+    local ScreenGui = Instance.new("ScreenGui")
+    local Frame = Instance.new("Frame")
+    local TextLabel = Instance.new("TextLabel")
+
+    ScreenGui.Parent = player:WaitForChild("PlayerGui")
+    ScreenGui.ResetOnSpawn = false
+
+    Frame.Parent = ScreenGui
+    Frame.Size = UDim2.new(0, 100, 0, 30)  -- Smaller UI: 100x30 instead of 150x40
+    Frame.Position = UDim2.new(1, -110, 0.5, -15)  -- Adjusted position for smaller size
+    Frame.AnchorPoint = Vector2.new(1, 0.5)
+    Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Frame.BackgroundTransparency = 0.2
+    Frame.BorderSizePixel = 0
+
+    TextLabel.Parent = Frame
+    TextLabel.Size = UDim2.new(1, 0, 1, 0)
+    TextLabel.Position = UDim2.new(0, 0, 0, 0)
+    TextLabel.BackgroundTransparency = 1
+    TextLabel.Text = ""
+    TextLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
+    TextLabel.TextScaled = true
+    TextLabel.Font = Enum.Font.SourceSansBold
+    TextLabel.TextTransparency = 0
+    Frame.Visible = false
+
+    return Frame, TextLabel
+end
+
+-- Initialize GUI
+local Frame, TextLabel = setupGui()
+local lastPopupTime = 0  -- Track the last time J was pressed
+
+-- Function to handle popup visibility
+local function updatePopup()
+    TextLabel.Text = "Bakugo go boom!! (9)"
+    Frame.Visible = true
+    lastPopupTime = tick()  -- Record the current time
+
+    -- Separate thread to hide the popup after 2 seconds from the last press
+    spawn(function()
+        while true do
+            if tick() - lastPopupTime >= 2 then
+                Frame.Visible = false
+                break
+            end
+            wait(0.1)  -- Check every 0.1 seconds
+        end
+    end)
+end
+
+-- Function to handle the infinite loop
+local function startLoop()
+    local backpack = player:WaitForChild("Backpack")
+    while true do
+        local args = {
+            [1] = "dodge",
+            [2] = {
+                ["explod"] = Enum.KeyCode.W
+            }
+        }
+        pcall(function()
+            backpack.ServerTraits.Input:FireServer(unpack(args))
+        end)
+        wait(0.1)
+    end
+end
+
+-- Handle input
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.Nine then
+        updatePopup()  -- Update popup with each 9 press
+        spawn(startLoop)  -- Start a new loop each time 9 is pressed
+    end
+end)
+
+-- Handle respawn
+local function onCharacterAdded(character)
+    player = Players.LocalPlayer
+    Frame, TextLabel = setupGui()  -- Recreate GUI on respawn
+    lastPopupTime = 0  -- Reset popup timer
+end
+
+-- Connect to character respawn
+player.CharacterAdded:Connect(onCharacterAdded)
+
+-- Initial character check
+if player.Character then
+    onCharacterAdded(player.Character)
+end
+
+print("Bakugo go boom (9)")
