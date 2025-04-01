@@ -1,0 +1,139 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = game.Workspace.CurrentCamera
+
+-- Function to find nearest player with HP > 0
+local function findNearestPlayer(character)
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return nil end
+    
+    local myTeam = LocalPlayer.Team
+    local myPos = character.HumanoidRootPart.Position
+    local validTargets = {}
+    
+    -- Collect all valid targets with their distances
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local enemyChar = player.Character
+            if enemyChar and enemyChar:FindFirstChild("HumanoidRootPart") then
+                local humanoid = enemyChar:FindFirstChild("Humanoid")
+                if humanoid and humanoid.Health > 0 then -- Only consider players with HP > 0
+                    local isValidTarget = false
+                    local enemyTeam = player.Team
+                    local enemyTeamName = enemyTeam and enemyTeam.Name or nil
+                    local myTeamName = myTeam and myTeam.Name or nil
+                    
+                    -- Team-based conditions
+                    if myTeam then
+                        if myTeam.Name == "Red Team" and enemyTeamName and enemyTeamName ~= ".AFK" and enemyTeamName ~= "Neutral" then
+                            if enemyTeamName ~= "Red Team" then
+                                isValidTarget = true
+                            end
+                        elseif myTeam.Name == "Blue Team" and enemyTeamName and enemyTeamName ~= ".AFK" and enemyTeamName ~= "Neutral" then
+                            if enemyTeamName ~= "Blue Team" then
+                                isValidTarget = true
+                            end
+                        elseif myTeam.Name == "Green Team" and enemyTeamName and enemyTeamName ~= ".AFK" and enemyTeamName ~= "Neutral" then
+                            if enemyTeamName ~= "Green Team" then
+                                isValidTarget = true
+                            end
+                        elseif myTeam.Name == "Neutral" then
+                            isValidTarget = true
+                        elseif myTeam.Name == ".AFK" then
+                            if enemyTeamName ~= ".AFK" then
+                                isValidTarget = true
+                            end
+                        end
+                    else
+                        -- If not on a team, target any player
+                        isValidTarget = true
+                    end
+                    
+                    if isValidTarget then
+                        local enemyPos = enemyChar.HumanoidRootPart.Position
+                        local distance = (myPos - enemyPos).Magnitude
+                        table.insert(validTargets, {player = player, distance = distance})
+                    end
+                end
+            end
+        end
+    end
+    
+    -- Sort targets by distance and return the closest
+    table.sort(validTargets, function(a, b) return a.distance < b.distance end)
+    if #validTargets > 0 then
+        return validTargets[1].player
+    end
+    return nil
+end
+
+-- Function to teleport behind target and adjust camera
+local function teleportBehind(target, character)
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+    
+    local targetChar = target.Character
+    if not targetChar or not targetChar:FindFirstChild("HumanoidRootPart") then return end
+    
+    -- Calculate position 5 studs behind target
+    local targetPos = targetChar.HumanoidRootPart.Position
+    local targetCFrame = targetChar.HumanoidRootPart.CFrame
+    local behindPos = targetCFrame * CFrame.new(0, 0, 5) -- 5 studs behind
+    
+    -- Calculate direction for character to face the target
+    local lookVector = (targetPos - behindPos.Position).Unit
+    local newCFrame = CFrame.new(behindPos.Position, behindPos.Position + lookVector)
+    
+    -- Teleport and face target with character
+    character.HumanoidRootPart.CFrame = newCFrame
+    
+    -- Force camera to face directly behind target with slight upward tilt (ABA compatible)
+    local humanoid = character:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.AutoRotate = false -- Prevent auto-rotation from interfering
+    end
+    
+    -- Camera at head level (approx. 1.5 studs above HumanoidRootPart), facing target's back with slight upward tilt
+    local cameraPos = behindPos.Position + Vector3.new(0, 1.5, 0) -- Head height
+    local targetBackPos = targetPos + (targetCFrame.LookVector * 5) -- Point 5 studs in front of target
+    local slightUpPos = targetBackPos + Vector3.new(0, 0.5, 0) -- Slight upward tilt (0.5 studs up)
+    Camera.CFrame = CFrame.new(cameraPos, slightUpPos)
+    
+    -- Re-enable auto-rotation if it exists
+    if humanoid then
+        spawn(function()
+            wait(0.1) -- Brief delay to ensure camera settles
+            humanoid.AutoRotate = true
+        end)
+    end
+end
+
+-- Function to set up input handling
+local function setupInput(character)
+    local connection
+    connection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        
+        if input.KeyCode == Enum.KeyCode.X then
+            local nearestPlayer = findNearestPlayer(character)
+            if nearestPlayer then
+                teleportBehind(nearestPlayer, character)
+            end
+        end
+    end)
+    
+    -- Disconnect when character changes
+    character.AncestryChanged:Connect(function()
+        if not character:IsDescendantOf(game) then
+            connection:Disconnect()
+        end
+    end)
+end
+
+-- Handle initial character and respawns
+if LocalPlayer.Character then
+    setupInput(LocalPlayer.Character)
+end
+
+LocalPlayer.CharacterAdded:Connect(function(character)
+    setupInput(character)
+end)
