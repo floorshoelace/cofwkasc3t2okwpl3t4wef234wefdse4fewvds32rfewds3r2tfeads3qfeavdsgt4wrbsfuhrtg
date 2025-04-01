@@ -1,0 +1,193 @@
+local plr = game:GetService("Players").LocalPlayer
+local mouse = plr:GetMouse()
+local UIS = game:GetService("UserInputService")
+
+-- **Tool Transfer Optimization**
+local function transferTools(fromContainer, toContainer)
+    for _, child in pairs(fromContainer:GetChildren()) do
+        if child:IsA("Tool") then
+            child.Parent = toContainer
+        end
+    end
+end
+
+local function handleToolTransfer(key, transferToChar)
+    if transferToChar then
+        transferTools(plr.Backpack, plr.Character)
+    else
+        transferTools(plr.Character, plr.Backpack)
+    end
+end
+
+-- **Input Handling for Tool Transfer**
+mouse.KeyDown:Connect(function(key)
+    if key == "z" then handleToolTransfer(key, true) end
+    if key == "x" then handleToolTransfer(key, false) end
+end)
+
+-- **Closest Humanoid Caching**
+local lastTarget = nil
+local lastCalculateTime = 0
+local calculateInterval = 0.1 -- Update target every 0.1 seconds
+
+local function findClosestHumanoid()
+    local closest, distance = nil, math.huge
+    for _, obj in pairs(workspace.Live:GetChildren()) do
+        if obj.Name ~= "ShadowHealerNPC" and obj.Name ~= "ShadowKnightNPC" and obj.Name ~= "ShadowMageNPC" 
+           and obj.Name ~= plr.Name and not string.find(obj.Name, "^Mahoraga_") then
+            local humanoid = obj:FindFirstChildOfClass("Humanoid")
+            if humanoid and obj:FindFirstChild("HumanoidRootPart") then
+                local newDistance = (obj.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
+                if newDistance < distance then
+                    closest, distance = obj, newDistance
+                end
+            end
+        end
+    end
+    return closest
+end
+
+local function getClosestHumanoid()
+    local currentTime = tick()
+    if currentTime - lastCalculateTime > calculateInterval then
+        lastTarget = findClosestHumanoid()
+        lastCalculateTime = currentTime
+    end
+    return lastTarget
+end
+
+-- **Ability Activation Optimization**
+local keyToTools = {
+    [Enum.KeyCode.One] = {
+        "Death Beam", "Kick Barrage", "Mask", "Weak Repel", "Accelerate", "Kamehameha", "Vampiric Strength", "Overwhelming Firepower", "Getsuga Tensho", "Gatling", "Yoruba Lance", "Rasengan", "Schwartzshieldo",
+        "Onigiri", "Super Volley", "Camouflage", "Fallen Angel", "Fireball Jutsu", "White Ripple", "Snipe", "Collier", "Demon Wave",
+        "Lightning Blade", "Ice Path", "Dora Barrage", "Flashstep", "Grab", "Counter Cut", "Room / Shambles", "Destructo Disk", "Primary Lotus",
+        "Flashstep", "Balloon Inflate", "Rainstorm", "Victory", "Vice Grip", "Firefly Light", "Kamehameha", "Rotation", "Flashstep", "Justice Crash",
+        "Buso Gatling", "Kamehameha", "Delaware Smash", "Cross Kicks", "Water Clone", "Ki Blitz", "Cero", "Jump Slash", "Sanzen Sekai", "Buster Cannon",
+        "Sand Defense", "Breathe", "Light Squids", "Rapid Thrusts", "Pinpoint Shot", "Suibian", "Dragon Hunting Flash", "Dirt", "Shigan: Ouren", "Spectre", "Energy Fist", "Chidori Katana", "Skyscraper",
+        "Yata Mirror", "Rasengan Barrage", "Slicing Exorcism", "Mana Burst", "Psychic Combo", "Ice Whip", "Afterimage Strike",
+        "Lava Pillar", "Crow Genjutsu", "Red", "Finger Cero", "Grapple", "Spirit Punch", "Fire Star",
+        "Asura Path", "Severance", "Desert Pull", "Chain Grab", "Linear Strike", "Rebellion Spear", "Benizakura Flash", "Punch Onslaught", "Nunchaku", "Nunchaku", "Hidden Lotus",
+        "Flash Combo", "RAILGUN", "Future Sight", "El Thor", "Combo Blitz",
+        "Arabesque Tile Punch", "Blackwhip", "Triple Shot", "Angel's Poem", "Cosmic Rush", "Spin", "Zeus",
+        "Cloaked Lariat", "Mad Dance", "Sledgehammer", "True Power", "Jab Rush",
+        "Ground Pound", "Shatter", "Rock", "Psychic Binding", "Black Meteorite", "Flying Thunder God", "Flashstep",
+        "Shark Teeth", "Boogie Woogie", "Stand Barrage", "Power Roar", "Divergent Fists", "Ruler's Authority", "Dagger Slash", "Gunbai Twister", "Shunpo Slice", "Maka Chop", "Ken", "Rhythm Echo", "Continuous Energy Bullets",
+    	"Sweep", "Rinnegan", "Ruler's Hand", "Spear Thrust",
+        "Projection", "Hamon Bulletcap", "Stun Grenade",
+        "Air Cutter", "Stand Defense", "Unknowing Fire", "Bungee Flail", "Cough Blood",
+        "Needles", "Shadow Manipulation", "Waterfowl Dance", "Glacier", "Combat Knife", "Indoor Fish",
+        "Bicycle Kick", "Vault", "Tree", "Prominence Burn", "Reckless Charge", "Coin Bomb",
+        "7:3 Combo", "Dive", "Bunker Bolt", "Domine Quo Vadis",
+        "Stand Rush", "Bossu?", "Fire Dragon Roar", "Hammer",
+        "Water Wheel", "Nova Ascension", "Sword Lunge", "Switch",
+        "Esoteric Combo", "Hecate 2", "2nd Form: Pearl Flower Moongazing"
+    },
+    [Enum.KeyCode.Two] = {
+        "Tail Slam", "Impact Slashes", "Rush", "Dropkick Flurry", "Getsuga Slash", "Hoverboard", "Bazooka", "Uzumaki Barrage", "Umbrella Barrage",
+        "Saikuru", "Rush", "Chidori", "Sword Lunge", "Quickdraw", "Susanoo Ribcage", "Shirafune", "Useless Goddess", "Frit Assorti", "Special Beam Cannon",
+        "Mud Wall", "Slash", "Taijutsu Combo", "Blood Frenzy", "BANG", "Jump", "Slash / Amputate", "Strong Repel", "Secret Technique", "Kamehameha", "Shuriken", "Byakurai", "Body Slam",
+        "Fire Fist", "Beatdown", "Gut Kick", "Mister Slime", "Monarch's Domain", "Explosive Kunai", "Spinning Meteor", "Control Rubble", "Fast Flash Attack","Kageoni", "Justice Tackle", "Red Hawk", "Ki Blast",
+        "Hiding in Mist", "Sonido Kicks", "Knife Trap", "String Trap", "Void Step", "Bullet Hell", "Dash Barrage", "Punch", "Tiger Hunt", "Rapid Sword Stream", "Sand Coffin", "Sweep",
+        "Repeater", "Hell Memories", "DORA!", "Thunder Shock", "Sendo Overdrive", "Freezing Touch", "Detroit Smash", "Maana Blast", "Exterminate", "Homing Shot", "Split Finger Shot", "Raging Assault", "Crush Cannon", "Chidori Stream", "Sonido Strike",
+        "Kick Combo", "Rasengan Combo", "Sword Conversion", "Rubble Smash", "Inspire Courage", "Rankyaku",  "Ice Wall", "Blender", "Plume",
+        "Shuriken Assualt", "Pole", "Psychic Slap Barrage", "Fool!", "Bala", "Skateboard", "Spirit Shotgun", "Snipe", "Six Paths Combo", "Quake",
+        "Nice Shot", "Severe Hurricane", "45% Detroit Smash", "Black Flash", "Dodge Roll", "Bow Barrage", "Black Slash", "Primary Lotus", "Primary Lotus", "Down Smash", "Iron Sand",
+        "20MV Vari", "Explosive  Field", "Five Thousand Tile Punch",
+        "Rapid Kick Rush", "Rocks", "Prometheus", "7-Blade Combo",
+        "Heavy Blow", "Kyoka Suigetsu", "Knives", "Brilliant Bone Blades", "Spinning Elbow", "Demon Claw Strike",
+        "Ice Time", "Raijin Kunai", "Taimatsu", "Shark Tooth Drill",
+        "Wrathful Crash", "Susanoo Guard", "Desert Spada", "Rikujokoro", "Grigori", "Quick Draw", "Instant Transmission",
+        "Ground Shaking", "Crimson Edge",
+        "Enhancement", "Clacker Boomerang", "Blast Rush",
+        "Charge Strike", "Star Finger", "Liger Bomb", "Card Throw",
+        "Flash Kick", "Shrine", "Ice Path", "Triple Accel", "Skill Hunter",
+        "Jet Kick", "String Barrier", "Lunge", "Frog", "Incinerate", "Chariot Ride",
+        "Stand Rush", "Ratio Technique", "Shadow Strike", "Power", "Kick Barrage", "Stunning Strike",
+        "Gun", "Knife Throw", "Blood Bath", "Epitaph", "Dragon Sword Horn", "Floor", "Robe of Yuen",
+        "Flowing Dance", "Enhance Armament", "Penatrator",
+        "Smoke Bomb", "Blooming Flame", "3rd Form: Loathsome Moon, Chains"
+		},
+    [Enum.KeyCode.Three] = {
+        "Death Saucer", "Flash Strike", "Silverine Slash", "Brute Force", "Feast", "Amaterasu", "Dragon Combo", "Multi-Cut", "Rocket", "Shadow Clone", "Chuuni-charge",
+        "Toru", "Explosive Wave", "Fuma Shuriken", "Skate Dash", "White Moon", "Darkness", "Darkness!", "Spectre", "Hellzone Grenade",
+        "Headhunter Jutsu", "Breaker", "Rupture", "High Winds", "Barrel", "Scissor", "Rock Wall",  "Black Flash", "Weak Strike", "Swat", "Grab","Phantom Cut", "Takt", "Solar Flare", "Leaf Hurricane", "Scatter",
+        "Volleyball", "Fire Pillar", "Curse Blade", "Hat Throw", "Uppercut", "64 Palms", "Takaoni", "Incinerate", "Jet Pistol",
+        "Flash Fist", "Decapitate", "Leap", "SHAARK!!!", "Spirit Sword", "Smokescreen", "Desert Vacuum", "Hierro Counter", "Cross Slash", "Yakkodori", "Blazing Rush",
+        "Sand Tsunami", "Flashstep", "Tactical Retreat", "Blue", "Heavy Strike", "Assassin's Step", "Lariat", "Grill Shot", "Burst Energy", "Chidori Senbon",
+        "Sonido Clones", "Light Speed Kick", "Bank Shot", "Shadow Clones", "Ice Trap",
+        "Meteor", "Lava Pool", "Fireball Jutsu", "Beautiful Violence", "Summon: Tank", "Predict", "Spirit Gun", "5 Ton Hammer",
+        "Almighty Push", "Grasp", "Scarlet Punch", "Psycho Smash", "Psycho Burst", "Bat Swarm", "Ki Traps", "Energy Wave", "Dynamic Entry", "Dynamic Entry",
+        "Dynamic Entry", "Pounce", "Lightning Spear", "Sango", "Kamehameha", "Ichimonji",
+        "Yoruba Forge", "Uchimizu", "Sweeping Blow", "Airstrike", "Kami-e", "Kame Blast", "Samehada Feast", "Psychic Blast", "Napoleon",
+        "God Big Bang", "Nut Cracker", "Samehada Charge", "Punisher Drive", "Shadow Surge",
+        "Kurohitsugi", "Rising Kick", "Demon Rush", "Partisan", "Kick Away/Sledgehammer", "Yellow Flash Whirlwind",
+        "Incinerate", "Fishman Bullets", "COUNTER", "Susanoo Rush", "Haien", "Witch Hunt",
+        "True Strike", "Kamehameha", "Gura Punch", "Talisman", 
+        "Rapid Fire", "Manji Kick", "Rho Aias", "Tommy Gun",
+        "Snake Awakens", "Summon: Beru", "Army of Shadows", "AP Shot", "ORA!", "Card Slicer",
+        "Poke", "Furu's Blessing", "Black Hurricane", "Flash Freeze", "Ben's Knife",
+        "Engine Dash", "Flourish", "Zomba", "Flare Blitz", "Via Expugnatio", "Bomb",
+        "Permeation", "Shield Toss", "Piercing Crimson", "Disc Steal",
+        "Time Shift", "Erasure β", "Maana Combo", "Dragon Iron Fist", "Lance",
+        "Striking Tide", "Moon Flash", "Thermal Element", "Heal Spell", "Rising Universe",
+        "Explosive Beads", "Scythe Slashes", "Tempo", "5th Form: Moon Spirit Calamitous Eddy"
+		},
+    [Enum.KeyCode.Five] = {
+        "Planet Destroyer", "Getsuga", "Kaioken", "Wind Propulsion", "Lunge", "Pistol", "Clone Throw", "Avalon Strike",
+        "Shishi Sonson", "Galick Gun", "Lion's Barrage", "Kido", "STEAL", "Table Party", "Rush", "Overdrive",
+        "Kunai", "Taunt", "Triple Strike", "Crimson Meteorite", "Switch", "Space Elimination", "Resolve", "Counter Shock / Gamma Knife", "Scattershot", "Rising Wind",
+        "Jab", "Newspaper Slap", "Paper", "Fire Gun", "Flurry Brilliance", "Bearing Shot", "Super Bomber", "Air Palm", "Bushogoma", "Machine Punches",
+        "Grizzly Magnum", "Stone Punch", "Kick Rush", "Sword Throw", "Panther Combo", "Mako", "1080 Pound Phoenix",
+        "Burning Attack", "Sunlight Yellow OD", "Sand Spikes", "Shoulder Bash", "Shoot to Kill", "Grenade", "Eternal Darkness Slash", "Arm Cannon", "Concasser", "Vanish Kick",
+        "Chidori True Spear", "Shield", "Shadow Rain", "Summon: Igris", "Deflective Shield", "Cero", "Finger Laser", "Rasengan Throw",
+        "Freezing Dash", "Behind You", "Eh?", "Spear Hand", "Lava Fist", "Cross Kicks", "Demonic Illusion", "Slice",
+        "Spirit Combo", "Impact Dial", "Scalpels", "Black Divider", "Universal Pull", "Desert Encierro", "Rush",
+        "Flip Kick", "Flip Kick", "Revolution", "Flip Kick", "Tekkai", "Flip", "Electroshock", "Thunder Bird", "Psycho Crash",
+        "Savage Strike", "Falling Arsenal", "Infinity", "Soshark", "Elbow Kick", "Crush",
+        "Combination", "Final Strike", "Dark Claw", "Giyuki Grab", "Kame / Galick",
+        "Flash Dodge", "Devil Man", "ZASSHU", "Human Man", "Hunter's Desperation", "Pheasant Beak",
+        "Flame Strike", "Boogie Kicks", "Ripper", "Kiribachi", "Eraser Blow", "Great Fireball", "Portable Gigai",
+        "Soul Rend", "Buso", "Black Power Ball", "Riot Javelin", "Crush",
+        "My Brother", "Tohsaka!", "Clacker Volley",
+        "Grenadier Shot", "Punish", "Grind", "Blade Storm", "Venice...", "Starlight Shot", "Stand Rush", "Bungee Gum",
+        "Weak Texas Smash", "HAMMER!", "Dash", "Onslaught", "Defrost", "Contender",
+        "Fun Fun Cloth", "Police Girl", "Chase", "Downkick", "Blink Thrust", "Life Punch",
+        "Stretchy Guard", "Jetburn", "Heart Kreuz Armor", "Lightning Cloak", "Cleaving Strikes", "Sheer Heart Attack", "Bisecting Slash",
+        "Phantom Crush", "Shadow Barrage", "Perfect Guard",
+        "Melt Your Heart", "Pinpoint Focus", "Slide In", "Absorb", "Smack",
+        "Crimson Dragon Fist", "Ice Geyser", "Manchester Smash", "Sword Cultivation", "Whirlpool", "Rage Spike",
+        "Kon", "Redirection", "Flaming Tiger", "Tempo",
+        "16th Form: Moonbow, Half Moon"
+	},
+	[Enum.KeyCode.Six] = {
+		"Erasure",
+	},
+}
+
+UIS.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed then
+        local tools = keyToTools[input.KeyCode]
+        if tools then
+            for _, toolName in pairs(tools) do
+                -- Check if the tool is in the character or backpack before firing
+                if (plr.Character and plr.Character:FindFirstChild(toolName)) or 
+                   (plr.Backpack and plr.Backpack:FindFirstChild(toolName)) then
+                    local target = getClosestHumanoid()
+                    if target then
+                        plr.Backpack.ServerTraits.Input:FireServer("fire", {
+                            air = false,
+                            targ = target,
+                            teamtarg = target,
+                            camdir = Vector3.new(-0.941036, -0.0972724, 0.324019),
+                            mousehit = CFrame.new(2298.47, 957.799, 212.204),
+                            campos = Vector3.new(2381.13, 966.308, 183.744),
+                            range = "2",
+                            ToolName = toolName
+                        })
+                    end
+                end
+            end
+        end
+    end
+end)
