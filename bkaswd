@@ -1,0 +1,156 @@
+local player = game.Players.LocalPlayer
+local backpack = player:WaitForChild("Backpack")
+local userInputService = game:GetService("UserInputService")
+
+-- Create the main GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "BackpackGUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- Create the frame with ultra-sleek design
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 180, 0, 260)
+frame.Position = UDim2.new(0, 10, 0.65, -130)
+frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+frame.BorderSizePixel = 0
+frame.Visible = false
+frame.Parent = screenGui
+
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 12)
+uiCorner.Parent = frame
+
+local uiStroke = Instance.new("UIStroke")
+uiStroke.Color = Color3.fromRGB(60, 60, 60)
+uiStroke.Thickness = 0.8
+uiStroke.Parent = frame
+
+-- Add minimalist title bar
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 20)
+titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = frame
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 12)
+titleCorner.Parent = titleBar
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -8, 1, 0)
+title.Position = UDim2.new(0, 4, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "Backpack"
+title.TextColor3 = Color3.fromRGB(220, 220, 220)
+title.TextSize = 14
+title.Font = Enum.Font.GothamBold
+title.Parent = titleBar
+
+-- Create scrolling frame
+local scrollingFrame = Instance.new("ScrollingFrame")
+scrollingFrame.Size = UDim2.new(1, -8, 1, -28)
+scrollingFrame.Position = UDim2.new(0, 4, 0, 24)
+scrollingFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+scrollingFrame.BorderSizePixel = 0
+scrollingFrame.ScrollBarThickness = 3
+scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 80)
+scrollingFrame.Parent = frame
+
+local scrollCorner = Instance.new("UICorner")
+scrollCorner.CornerRadius = UDim.new(0, 10)
+scrollCorner.Parent = scrollingFrame
+
+-- Create UIListLayout
+local listLayout = Instance.new("UIListLayout")
+listLayout.Padding = UDim.new(0, 4)
+listLayout.Parent = scrollingFrame
+
+-- Function to update inventory
+local function updateInventory()
+    for _, child in pairs(scrollingFrame:GetChildren()) do
+        if child:IsA("TextLabel") then
+            child:Destroy()
+        end
+    end
+    
+    for _, item in pairs(backpack:GetChildren()) do
+        local itemLabel = Instance.new("TextLabel")
+        itemLabel.Size = UDim2.new(1, -6, 0, 20)
+        itemLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        itemLabel.Text = " " .. item.Name
+        itemLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+        itemLabel.TextSize = 13
+        itemLabel.TextXAlignment = Enum.TextXAlignment.Left
+        itemLabel.Font = Enum.Font.Gotham
+        itemLabel.Parent = scrollingFrame
+        
+        local labelCorner = Instance.new("UICorner")
+        labelCorner.CornerRadius = UDim.new(0, 6)
+        labelCorner.Parent = itemLabel
+    end
+    
+    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y)
+end
+
+-- Dragging functionality
+local dragging = false
+local dragStart = nil
+local startPos = nil
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = frame.Position
+    end
+end)
+
+titleBar.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+titleBar.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+-- Toggle visibility with J key
+local isVisible = false
+userInputService.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.J then
+        isVisible = not isVisible
+        frame.Visible = isVisible
+        if isVisible then
+            updateInventory()
+        end
+    end
+end)
+
+-- Update on backpack changes
+backpack.ChildAdded:Connect(updateInventory)
+backpack.ChildRemoved:Connect(updateInventory)
+
+-- Handle character respawn
+local function onCharacterAdded()
+    backpack = player:WaitForChild("Backpack")
+    backpack.ChildAdded:Connect(updateInventory)
+    backpack.ChildRemoved:Connect(updateInventory)
+    if isVisible then
+        updateInventory()
+    end
+end
+
+player.CharacterAdded:Connect(onCharacterAdded)
+
+-- Initial update
+updateInventory()
